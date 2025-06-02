@@ -25,7 +25,7 @@ W2V_PATH = 'GoogleNews-vectors-negative300.bin'
 
 # -------- Read the news data file and parse it into a useable format --------
 def split_on_comma_outside_quotes(s):
-    return re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', s) # This regular expression was created by CHAT GPT
+    return re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', s) # This regular expression was created by ChatGPT
 
 def read_file(filename):
     titles = []
@@ -129,7 +129,8 @@ def bert_similarity(titles, articles):
     article_vecs = bert_model.encode(articles, convert_to_tensor=False)
 
     # cosine similarity between each title and all articles
-    sim_matrix = cosine_similarity(title_vecs, article_vecs)
+    sim_matrix = cosine_similarity(title_vecs, article_vecs) # choose article from title 
+    #sim_matrix = cosine_similarity(article_vecs, title_vecs)  # choose title from article worse performace  
     predicted_ids = sim_matrix.argmax(axis=1)
 
     accuracy('Bert cosine: ', predicted_ids)

@@ -75,9 +75,9 @@ def tfidf(titles, articles):
 # -------- functions for w2v cosine sim --------
 def preprocess(text):
     tokens = word_tokenize(text.lower())
-    # Remove punctuation but keeps number isalpha was slightly better but i dont really understand why since title 
-    # is likey to mention same numbers that the article does 
-    return [token for token in tokens if token.isalnum()]  
+    # Remove punctuation and numbers as mentioned in lecutre is good. We get better results with isalpha than isalnum 
+    # but dont really understand why since title is likey to mention same numbers that the article does for this task
+    return [token for token in tokens if token.isalpha()]  
 
 def get_average_vector(tokens, model, dim=300):
     valid_tokens = [token for token in tokens if token in model]

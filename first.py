@@ -65,8 +65,14 @@ def tfidf(titles, articles):
 
     # Fit and predict
     nn = NearestNeighbors(n_neighbors=1, metric='cosine')
+    '''
+    kankse något att disskutera, hur stor skillnad det är mellan dom låt oss kolla det
+
     nn.fit(article_vecs)
     _, indices = nn.kneighbors(title_vecs)
+    '''
+    nn.fit(title_vecs)
+    _, indices = nn.kneighbors(article_vecs)
     predicted_ids = indices.flatten()
 
     # Evaluate accuracy
@@ -82,7 +88,7 @@ def preprocess(text):
 def get_average_vector(tokens, model, dim=300):
     valid_tokens = [token for token in tokens if token in model]
     if not valid_tokens:
-        return np.zeros(dim)    # returns a zero vector to avoid errors, this does happend a bit which is stange
+        return np.zeros(dim)    # returns a zero vector to avoid errors, this does happend a bit which is stange, likely due to formating isuue in the original dataset
     
     vectors = np.array([model[token] for token in valid_tokens])
     return np.mean(vectors, axis=0)
@@ -106,7 +112,9 @@ def word2vec_similarity(titles, articles):
     article_vecs = np.array(article_vecs)
 
     # cosine similarity between each title and all articles
-    sim_matrix = cosine_similarity(title_vecs, article_vecs)
+    sim_matrix = cosine_similarity(title_vecs, article_vecs) # choose article from title 
+    #sim_matrix = cosine_similarity(article_vecs, title_vecs)  # choose title from article much worse performace, maybe due to 'noise' many words in the article  
+
     predicted_ids = sim_matrix.argmax(axis=1)
 
     # Evaluate 

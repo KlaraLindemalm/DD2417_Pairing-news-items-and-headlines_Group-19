@@ -16,6 +16,8 @@ from gensim.models import KeyedVectors
 # bert cosine
 from sentence_transformers import SentenceTransformer
 
+# If not already downloaded
+nltk.download('punkt')
 
 # -------- Some variables ---------
 FILE_PATH = 'news-article-categories.xlsx'
@@ -124,7 +126,7 @@ def bert_similarity(titles, articles):
 
     accuracy("Bert cosine: ", predicted_ids)
 
-
+# ------ Main() used to get the accuracy of the diffrent methods ------
 def main():
     titles, articles = read_file(FILE_PATH)
 

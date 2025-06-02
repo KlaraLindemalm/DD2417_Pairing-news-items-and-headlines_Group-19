@@ -13,6 +13,10 @@ import nltk
 from nltk.tokenize import word_tokenize
 from gensim.models import KeyedVectors
 
+# bert cosine
+from sentence_transformers import SentenceTransformer
+
+
 # -------- Some variables ---------
 FILE_PATH = 'news-article-categories.xlsx'
 W2V_PATH = 'GoogleNews-vectors-negative300.bin'
@@ -26,7 +30,7 @@ def read_file(filename):
     articles = []
     df = pd.read_excel(filename)
 
-    for id, combined_str in df['category,title,body'].items():
+    for _, combined_str in df['category,title,body'].items():
         if not isinstance(combined_str, str):
         # skip if not string some are NULL
             continue
@@ -81,7 +85,8 @@ def get_average_vector(tokens, model, dim=300):
     vectors = np.array([model[token] for token in valid_tokens])
     return np.mean(vectors, axis=0)
 
-def word2vec_similarity(titles, articles, w2v_model):
+def word2vec_similarity(titles, articles):
+    w2v_model = KeyedVectors.load_word2vec_format(W2V_PATH, binary=True)
     title_vecs = []
     for title in titles:
         tokens = preprocess(title)
@@ -98,20 +103,36 @@ def word2vec_similarity(titles, articles, w2v_model):
     title_vecs = np.array(title_vecs)
     article_vecs = np.array(article_vecs)
 
-    # Cosine similarity
+    # cosine similarity between each title and all articles
     sim_matrix = cosine_similarity(title_vecs, article_vecs)
     predicted_ids = sim_matrix.argmax(axis=1)
 
     # Evaluate 
     accuracy("Word2Vec Cosine: ", predicted_ids)
 
+# ------ Bert scentence vectors with cosine sim ------
+def bert_similarity(titles, articles):
+    bert_model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    # Encode titles and articles into embeddings
+    title_vecs = bert_model.encode(titles, convert_to_tensor=False)
+    article_vecs = bert_model.encode(articles, convert_to_tensor=False)
+
+    # cosine similarity between each title and all articles
+    sim_matrix = cosine_similarity(title_vecs, article_vecs)
+    predicted_ids = sim_matrix.argmax(axis=1)
+
+    accuracy("Bert cosine: ", predicted_ids)
+
+
 def main():
     titles, articles = read_file(FILE_PATH)
 
     nearest_neighbors(titles, articles)
 
-    w2v_model = KeyedVectors.load_word2vec_format(W2V_PATH, binary=True)
-    word2vec_similarity(titles, articles, w2v_model)
+    word2vec_similarity(titles, articles)
+
+    bert_similarity(titles, articles)
 
 if __name__ == "__main__":
     main()

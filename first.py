@@ -70,7 +70,7 @@ def nearest_neighbors(titles, articles):
     predicted_ids = indices.flatten()
 
     # Evaluate accuracy
-    accuracy("Nearest Neighbors TFID cosine: ", predicted_ids)
+    accuracy("Nearest Neighbors TF-IDF cosine: ", predicted_ids)
     
 # -------- functions for w2v cosine sim --------
 def preprocess(text):

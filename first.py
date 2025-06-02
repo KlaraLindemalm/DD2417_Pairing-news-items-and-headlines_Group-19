@@ -52,7 +52,7 @@ def accuracy(method, predicted_ids):
 
 
 # -------- Functions for NN cosine sim --------
-def nearest_neighbors(titles, articles):
+def FI_IDF(titles, articles):
 
     # Vectorize all texts
     vectorizer = TfidfVectorizer(stop_words='english') # Term Frequency-Inverse Document Frequency
@@ -70,7 +70,7 @@ def nearest_neighbors(titles, articles):
     predicted_ids = indices.flatten()
 
     # Evaluate accuracy
-    accuracy("Nearest Neighbors TF-IDF cosine: ", predicted_ids)
+    accuracy("NN TF-IDF cosine: ", predicted_ids)
     
 # -------- functions for w2v cosine sim --------
 def preprocess(text):
@@ -130,7 +130,7 @@ def bert_similarity(titles, articles):
 def main():
     titles, articles = read_file(FILE_PATH)
 
-    nearest_neighbors(titles, articles)
+    FI_IDF(titles, articles)
 
     word2vec_similarity(titles, articles)
 

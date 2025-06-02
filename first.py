@@ -39,8 +39,8 @@ def read_file(filename):
         
         parts = split_on_comma_outside_quotes(combined_str)
         if len(parts) == 3:
-            titles.append(parts[1].strip("\""))
-            articles.append(parts[2].strip("\""))
+            titles.append(parts[1].strip('\"'))
+            articles.append(parts[2].strip('\"'))
                 
     return titles, articles
 
@@ -52,12 +52,12 @@ def accuracy(method, predicted_ids):
 
 
 # -------- Functions for NN cosine sim --------
-def FI_IDF(titles, articles):
+def tfidf(titles, articles):
 
     # Vectorize all texts
     vectorizer = TfidfVectorizer(stop_words='english') # Term Frequency-Inverse Document Frequency
     all_texts = titles + articles
-    tfidf_matrix = vectorizer.fit_transform(all_texts)
+    tfidf_matrix = vectorizer.fit_transform(all_texts) # learns the vocabulary from all texts and converts each into a TF-IDF vector
 
     # Split vectors back
     title_vecs = tfidf_matrix[:len(titles)]
@@ -70,7 +70,7 @@ def FI_IDF(titles, articles):
     predicted_ids = indices.flatten()
 
     # Evaluate accuracy
-    accuracy("NN TF-IDF cosine: ", predicted_ids)
+    accuracy('NN TF-IDF cosine: ', predicted_ids)
     
 # -------- functions for w2v cosine sim --------
 def preprocess(text):
@@ -110,7 +110,7 @@ def word2vec_similarity(titles, articles):
     predicted_ids = sim_matrix.argmax(axis=1)
 
     # Evaluate 
-    accuracy("Word2Vec Cosine: ", predicted_ids)
+    accuracy('Word2Vec Cosine: ', predicted_ids)
 
 # ------ Bert scentence vectors with cosine sim ------
 def bert_similarity(titles, articles):
@@ -124,19 +124,19 @@ def bert_similarity(titles, articles):
     sim_matrix = cosine_similarity(title_vecs, article_vecs)
     predicted_ids = sim_matrix.argmax(axis=1)
 
-    accuracy("Bert cosine: ", predicted_ids)
+    accuracy('Bert cosine: ', predicted_ids)
 
 # ------ Main() used to get the accuracy of the diffrent methods ------
 def main():
     titles, articles = read_file(FILE_PATH)
 
-    FI_IDF(titles, articles)
+    tfidf(titles, articles)
 
     word2vec_similarity(titles, articles)
 
     bert_similarity(titles, articles)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
 

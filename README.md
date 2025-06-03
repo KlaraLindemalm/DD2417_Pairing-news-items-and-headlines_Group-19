@@ -13,7 +13,11 @@ pip install -r requirements.txt
 model can be found here: https://huggingface.co/NathaNn1111/word2vec-google-news-negative-300-bin/tree/main 
 This file should be named: GoogleNews-vectors-negative300.bin
 3. Run the script:
+Optional, specify the matching direction 'title_to_article' or 'article_to_title'. if not specified the script 
+defaults to 'title_to_article'. 
+
 ```bash
-python first.py
+python first.py title_to_article
+python first.py article_to_title
 ```
  

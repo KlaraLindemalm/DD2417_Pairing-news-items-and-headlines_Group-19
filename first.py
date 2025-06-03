@@ -1,4 +1,5 @@
 # Read inout
+import sys
 import pandas as pd
 import re
 
@@ -25,7 +26,7 @@ W2V_PATH = 'GoogleNews-vectors-negative300.bin'
 
 # -------- Read the news data file and parse it into a useable format --------
 def split_on_comma_outside_quotes(s):
-    return re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', s) # This regular expression was created by CHAT GPT
+    return re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', s) # This regular expression was created by ChatGPT
 
 def read_file(filename):
     titles = []
@@ -52,7 +53,7 @@ def accuracy(method, predicted_ids):
 
 
 # -------- Functions for NN cosine sim --------
-def tfidf(titles, articles):
+def tfidf(titles, articles, direction):
 
     # Vectorize all texts
     vectorizer = TfidfVectorizer(stop_words='english') # Term Frequency-Inverse Document Frequency
@@ -65,14 +66,14 @@ def tfidf(titles, articles):
 
     # Fit and predict
     nn = NearestNeighbors(n_neighbors=1, metric='cosine')
-    '''
-    kankse något att disskutera, hur stor skillnad det är mellan dom låt oss kolla det
-
-    nn.fit(article_vecs)
-    _, indices = nn.kneighbors(title_vecs)
-    '''
-    nn.fit(title_vecs)
-    _, indices = nn.kneighbors(article_vecs)
+    
+    if direction == 'title_to_article':
+        nn.fit(article_vecs)
+        _, indices = nn.kneighbors(title_vecs)
+    else:
+        nn.fit(title_vecs)
+        _, indices = nn.kneighbors(article_vecs)
+    
     predicted_ids = indices.flatten()
 
     # Evaluate accuracy
@@ -93,7 +94,7 @@ def get_average_vector(tokens, model, dim=300):
     vectors = np.array([model[token] for token in valid_tokens])
     return np.mean(vectors, axis=0)
 
-def word2vec_similarity(titles, articles):
+def word2vec_similarity(titles, articles, direction):
     w2v_model = KeyedVectors.load_word2vec_format(W2V_PATH, binary=True)
     title_vecs = []
     for title in titles:
@@ -112,8 +113,10 @@ def word2vec_similarity(titles, articles):
     article_vecs = np.array(article_vecs)
 
     # cosine similarity between each title and all articles
-    sim_matrix = cosine_similarity(title_vecs, article_vecs) # choose article from title 
-    #sim_matrix = cosine_similarity(article_vecs, title_vecs)  # choose title from article much worse performace, maybe due to 'noise' many words in the article  
+    if direction == 'title_to_article':
+        sim_matrix = cosine_similarity(title_vecs, article_vecs) # choose article from title 
+    else:
+        sim_matrix = cosine_similarity(article_vecs, title_vecs)  # choose title from article much worse performace 
 
     predicted_ids = sim_matrix.argmax(axis=1)
 
@@ -121,7 +124,7 @@ def word2vec_similarity(titles, articles):
     accuracy('Word2Vec Cosine: ', predicted_ids)
 
 # ------ Bert scentence vectors with cosine sim ------
-def bert_similarity(titles, articles):
+def bert_similarity(titles, articles, direction):
     bert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
     # Encode titles and articles into embeddings
@@ -129,23 +132,26 @@ def bert_similarity(titles, articles):
     article_vecs = bert_model.encode(articles, convert_to_tensor=False)
 
     # cosine similarity between each title and all articles
-    sim_matrix = cosine_similarity(title_vecs, article_vecs)
+    if direction == 'title_to_article':
+        sim_matrix = cosine_similarity(title_vecs, article_vecs) # choose article from title 
+    else:
+        sim_matrix = cosine_similarity(article_vecs, title_vecs)  # choose title from article worse performace  
     predicted_ids = sim_matrix.argmax(axis=1)
 
     accuracy('Bert cosine: ', predicted_ids)
 
 # ------ Main() used to get the accuracy of the diffrent methods ------
-def main():
+def main(direction='title_to_article'):
     titles, articles = read_file(FILE_PATH)
 
-    tfidf(titles, articles)
+    tfidf(titles, articles, direction)
 
-    word2vec_similarity(titles, articles)
+    word2vec_similarity(titles, articles, direction)
 
-    bert_similarity(titles, articles)
+    bert_similarity(titles, articles, direction)
 
 if __name__ == '__main__':
-    main()
-
+    direction = sys.argv[1] if len(sys.argv) > 1 else 'title_to_article'
+    main(direction)
 
 
